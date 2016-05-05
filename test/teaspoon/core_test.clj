@@ -1,7 +1,7 @@
 (ns teaspoon.core-test
   (:require [clojure.test :refer :all]
             [teaspoon.core :refer :all])
-  (:import [teaspoon.core City TourManager]))
+  (:import [teaspoon.core City TourManager Tour]))
 
 (deftest city-test
   (testing "Tests of the ICity interface."
@@ -25,4 +25,12 @@
       (is (= 1 (number-of-cities u)))
       (is (= 10 (get-x (get-city u 0))))
       (is (= 12 (get-y (get-city u 0))))
+      )))
+
+(deftest tour-test
+  (testing "Tests the ITour interface."
+    (let [cities [(City. 10 12) (City. 11 13)]
+          tm (TourManager. cities)
+          t (generate-individual (Tour. []) tm (number-of-cities tm)) ]
+      (is (every? #(contains-city t %) cities))
       )))
