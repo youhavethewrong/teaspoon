@@ -14,7 +14,6 @@
           y-dist (Math/abs (- (get-y c) (get-y c1)))]
       (Math/sqrt (+ (* x-dist x-dist) (* y-dist y-dist))))))
 
-
 (defprotocol ITourManager
   (add-city [t c])
   (get-city [t i])
@@ -47,7 +46,28 @@
   (get-distance [t]
     (reduce + 0 (map-indexed
                  (fn [i v]
-                   (.get-distance v (get l (inc i))))
+                   (distance-to v (get l (inc i))))
                  (butlast l))))
   (get-tour-size [t] (count l))
   (contains-city [t c] (some #(= c %) l)))
+
+(defprotocol IPopulation
+  (save-tour [p i t])
+  (get-tour [p i])
+  (get-fittest [p])
+  (population-size [p]))
+
+(defrecord Population [l]
+  IPopulation
+  (save-tour [p i t] (Population. (assoc l i t)))
+  (get-tour [p i] (nth l i))
+  (get-fittest [p] (:tour
+                    (first
+                     (sort-by :fitness
+                              (map (fn [tour]
+                                     (let [f (get-fitness tour)]
+                                       (println f)
+                                       {:fitness f
+                                        :tour tour}))
+                                   l)))))
+  (population-size [p] (count l)))
