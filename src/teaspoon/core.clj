@@ -52,6 +52,7 @@
   (contains-city [t c] (some #(= c %) l)))
 
 (defprotocol IPopulation
+  (initialize [p tm n])
   (save-tour [p i t])
   (get-tour [p i])
   (get-fittest [p])
@@ -59,6 +60,14 @@
 
 (defrecord Population [l]
   IPopulation
+  (initialize [p tm n]
+    (Population.
+     (vec
+      (for [i (range n)]
+        (generate-individual
+         (Tour. [])
+         tm
+         (number-of-cities tm))))))
   (save-tour [p i t] (Population. (assoc l i t)))
   (get-tour [p i] (nth l i))
   (get-fittest [p] (:tour
