@@ -63,3 +63,38 @@
       (is (= t2 (get-tour p3 2)))
       (is (< (get-fitness (get-fittest p3)) 0.6))
       )))
+
+
+(deftest ga-test
+  (testing "Tests the ability of the genetic algorithm to find a solution."
+    (let [c1 (City. 60 200)
+          c2 (City. 180 200)
+          c3 (City. 80 180)
+          c4 (City. 140 180)
+          c5 (City. 20 160)
+          c6 (City. 100 160)
+          c7 (City. 200 160)
+          c8 (City. 140 140)
+          c9 (City. 40 120)
+          c10 (City. 100 120)
+          c11 (City. 180 100)
+          c12 (City. 60 80)
+          c13 (City. 120 80)
+          c14 (City. 180 60)
+          c15 (City. 20 40)
+          c16 (City. 100 40)
+          c17 (City. 200 40)
+          c18 (City. 20 20)
+          c19 (City. 60 20)
+          c20 (City. 160 20)
+          tm (TourManager. [c1  c2  c3  c4
+                            c5  c6  c7  c8
+                            c9  c10 c11 c12
+                            c13 c14 c15 c16
+                            c17 c18 c19 c20])
+          p (initialize (Population. []) tm 50)
+          _ (println "Inital distance:" (get-distance (get-fittest p)))
+          p (evolve-population p)
+          p (evolve-population p)]
+      (is (= 10 (get-distance (get-fittest p))))
+      )))
