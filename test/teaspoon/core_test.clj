@@ -1,5 +1,6 @@
 (ns teaspoon.core-test
   (:require [clojure.test :refer :all]
+            [clojure.pprint :refer [pprint]]
             [teaspoon.core :refer :all])
   (:import [teaspoon.core City Population Tour TourManager]))
 
@@ -63,7 +64,6 @@
       (is (= t2 (get-tour p3 2)))
       (is (< (get-fitness (get-fittest p3)) 0.6))
       )))
-
 
 (deftest ga-test
   (testing "Tests the ability of the genetic algorithm to find a solution."

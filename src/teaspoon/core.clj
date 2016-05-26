@@ -1,4 +1,5 @@
-(ns teaspoon.core)
+(ns teaspoon.core
+  (:require             [clojure.pprint :refer [pprint]]))
 
 (defprotocol ICity
   (get-x [c])
@@ -70,13 +71,14 @@
          (number-of-cities tm))))))
   (save-tour [p i t] (Population. (assoc l i t)))
   (get-tour [p i] (nth l i))
-  (get-fittest [p] (:tour
-                    (first
-                     (sort-by :fitness
-                              (map (fn [tour]
-                                     {:fitness (get-fitness tour)
-                                      :tour tour})
-                                   l)))))
+  (get-fittest [p] (let [b (sort-by :fitness
+                                    (map (fn [tour]
+                                           {:fitness (get-fitness tour)
+                                            :tour tour})
+                                         l))]
+                     (Tour.
+                      (:l (:tour (last b))))))
+
   (population-size [p] (count l)))
 
 ;; -- GA --
@@ -106,19 +108,21 @@
         ordered? (< start end)
         r (set
            (map #(.intValue %) (if ordered?
-                                 (range start end)
-                                 (range end start))))]
-    (Tour. (vec
+                                 (range start (inc end))
+                                 (range end (inc start)))))
+        ct (vec
             (for [i (range t1-size)]
               (if (contains? r i)
                 (nth-city t1 i)
-                (nth-city t2 i)))))))
+                (nth-city t2 i))))]
+    (Tour. ct)
+))
 
 (defn tournament-selection
   [p]
   (let [p1 (Population.
             (vec
-             (for [i (range @elitism-offset tournament-size)]
+             (for [i (range tournament-size)]
                (get-tour p (* (Math/random) (population-size p))))))]
     (get-fittest p1)))
 
@@ -139,18 +143,18 @@
   (let [p1 (get-empty-population (population-size p))]
       (if elitism
         (do
-          (swap! elitism-offset inc)
+          (reset! elitism-offset 1)
           (save-tour p1 0 (get-fittest p)))
         p1)))
 
 (defn crossover-population
   [p p1]
-  (Population.
-   (vec
-    (for [i (range @elitism-offset (population-size p1))]
-      (let [t1 (tournament-selection p)
-            t2 (tournament-selection p)]
-        (crossover t1 t2))))))
+  (let [v (vec
+           (for [i (range @elitism-offset (population-size p))]
+             (let [t1 (tournament-selection p)
+                   t2 (tournament-selection p)]
+               (crossover t1 t2))))]
+    (Population. (cons (get-tour p 0) v ))))
 
 (defn mutate-population
   [p]
@@ -164,5 +168,50 @@
   [p]
   (let [n (new-population p)
         c (crossover-population p n)
-        m (mutate-population c)]
-    m))
+;;        mutate is horribly slow and probably broken
+;;        m (mutate-population c)
+        ]
+    c))
+
+
+
+(comment
+
+    (let [c1 (City. 60 200)
+          c2 (City. 180 200)
+          c3 (City. 80 180)
+          c4 (City. 140 180)
+          c5 (City. 20 160)
+          c6 (City. 100 160)
+          c7 (City. 200 160)
+          c8 (City. 140 140)
+          c9 (City. 40 120)
+          c10 (City. 100 120)
+          c11 (City. 180 100)
+          c12 (City. 60 80)
+          c13 (City. 120 80)
+          c14 (City. 180 60)
+          c15 (City. 20 40)
+          c16 (City. 100 40)
+          c17 (City. 200 40)
+          c18 (City. 20 20)
+          c19 (City. 60 20)
+          c20 (City. 160 20)
+          tm (TourManager. [c1  c2  c3  c4
+                            c5  c6  c7  c8
+                            c9  c10 c11 c12
+                            c13 c14 c15 c16
+                            c17 c18 c19 c20])
+          ]
+      (reset! elitism-offset 0)
+      (loop [p (initialize (Population. []) tm 50)
+             c 0]
+        (println "Loop" c)
+        (println "Elitism" @elitism-offset)
+        (println "Distance" (get-distance (get-fittest p)))
+        (if (>= c 100)
+          p
+          (recur (evolve-population p) (inc c))))
+
+      )
+    )
