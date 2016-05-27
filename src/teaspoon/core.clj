@@ -1,5 +1,4 @@
-(ns teaspoon.core
-  (:require             [clojure.pprint :refer [pprint]]))
+(ns teaspoon.core)
 
 (defprotocol ICity
   (get-x [c])
@@ -115,8 +114,7 @@
               (if (contains? r i)
                 (nth-city t1 i)
                 (nth-city t2 i))))]
-    (Tour. ct)
-))
+    (Tour. ct)))
 
 (defn tournament-selection
   [p]
@@ -152,16 +150,15 @@
 
 (defn mutate-population
   [p]
-  (let [v (for [i (range @elitism-offset (population-size p))]
-          (mutate (get-tour p i)))]
-    (Population. (vec (cons (get-tour p 0) v)))))
+  (Population. (vec (cons (get-tour p 0)
+                          (for [i (range @elitism-offset (population-size p))]
+                            (mutate (get-tour p i)))))))
 
 (defn evolve-population
   [p]
-  (let [n (new-population p)
-        c (crossover-population p n)
-        m (mutate-population c)]
-    m))
+  (->> (new-population p)
+       (crossover-population p)
+       (mutate-population)))
 
 (defn find-solution
   [tm s n]
