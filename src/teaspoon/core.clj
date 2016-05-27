@@ -126,18 +126,6 @@
                (get-tour p (* (Math/random) (population-size p))))))]
     (get-fittest p1)))
 
-(defn mutate
-  [t]
-  (for [i (range (get-tour-size t))]
-    (if (< (Math/random) mutation-rate)
-      (let [j (.intValue (* (Math/random) (get-tour-size t)))
-            c1 (nth-city t i)
-            c2 (nth-city t j)
-            t (set-city t i c2)
-            t (set-city t j c1)]
-        t)
-      t)))
-
 (defn new-population
   [p]
   (let [p1 (get-empty-population (population-size p))]
@@ -149,69 +137,39 @@
 
 (defn crossover-population
   [p p1]
-  (let [v (vec
-           (for [i (range @elitism-offset (population-size p))]
-             (let [t1 (tournament-selection p)
-                   t2 (tournament-selection p)]
-               (crossover t1 t2))))]
-    (Population. (cons (get-tour p 0) v ))))
+  (let [v (for [i (range @elitism-offset (population-size p))]
+            (let [t1 (tournament-selection p)
+                  t2 (tournament-selection p)]
+              (crossover t1 t2)))]
+    (Population. (vec (cons (get-tour p 0) v )))))
+
+(defn mutate
+  [t]
+  (if (< (Math/random) mutation-rate)
+    (let [shv (shuffle (:l t))]
+      (Tour. shv))
+    t))
 
 (defn mutate-population
   [p]
-  (Population.
-   (flatten
-    (vec
-     (for [i (range @elitism-offset (population-size p))]
-       (mutate (get-tour p i)))))))
+  (let [v (for [i (range @elitism-offset (population-size p))]
+          (mutate (get-tour p i)))]
+    (Population. (vec (cons (get-tour p 0) v)))))
 
 (defn evolve-population
   [p]
   (let [n (new-population p)
         c (crossover-population p n)
-;;        mutate is horribly slow and probably broken
-;;        m (mutate-population c)
-        ]
-    c))
+        m (mutate-population c)]
+    m))
 
-
-
-(comment
-
-    (let [c1 (City. 60 200)
-          c2 (City. 180 200)
-          c3 (City. 80 180)
-          c4 (City. 140 180)
-          c5 (City. 20 160)
-          c6 (City. 100 160)
-          c7 (City. 200 160)
-          c8 (City. 140 140)
-          c9 (City. 40 120)
-          c10 (City. 100 120)
-          c11 (City. 180 100)
-          c12 (City. 60 80)
-          c13 (City. 120 80)
-          c14 (City. 180 60)
-          c15 (City. 20 40)
-          c16 (City. 100 40)
-          c17 (City. 200 40)
-          c18 (City. 20 20)
-          c19 (City. 60 20)
-          c20 (City. 160 20)
-          tm (TourManager. [c1  c2  c3  c4
-                            c5  c6  c7  c8
-                            c9  c10 c11 c12
-                            c13 c14 c15 c16
-                            c17 c18 c19 c20])
-          ]
-      (reset! elitism-offset 0)
-      (loop [p (initialize (Population. []) tm 50)
-             c 0]
-        (println "Loop" c)
-        (println "Elitism" @elitism-offset)
-        (println "Distance" (get-distance (get-fittest p)))
-        (if (>= c 100)
-          p
-          (recur (evolve-population p) (inc c))))
-
-      )
-    )
+(defn find-solution
+  [tm s n]
+  (reset! elitism-offset 0)
+  (loop [p (initialize (Population. []) tm s)
+         c 0]
+    (println "Generation" c)
+    (println "Distance" (get-distance (get-fittest p)))
+    (if (>= c n)
+      p
+      (recur (evolve-population p) (inc c)))))

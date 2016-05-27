@@ -92,9 +92,12 @@
                             c9  c10 c11 c12
                             c13 c14 c15 c16
                             c17 c18 c19 c20])
-          p (initialize (Population. []) tm 50)
-          _ (println "Inital distance:" (get-distance (get-fittest p)))
-          p (evolve-population p)
-          p (evolve-population p)]
-      (is (= 10 (get-distance (get-fittest p))))
+          number-of-generations 25
+          population-size 50
+          initial-distance (get-distance
+                            (get-fittest
+                             (initialize (Population. []) tm population-size)))
+          p (find-solution tm population-size number-of-generations)]
+      (is (> initial-distance
+             (get-distance (get-fittest p))))
       )))
