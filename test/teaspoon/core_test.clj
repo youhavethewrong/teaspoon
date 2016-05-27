@@ -1,7 +1,8 @@
 (ns teaspoon.core-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer [pprint]]
-            [teaspoon.core :refer :all])
+            [teaspoon.core :refer :all]
+            [teaspoon.ga :refer :all])
   (:import [teaspoon.core City Population Tour TourManager]))
 
 (deftest city-test
