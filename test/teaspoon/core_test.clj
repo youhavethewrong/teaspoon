@@ -93,7 +93,7 @@
                             c9  c10 c11 c12
                             c13 c14 c15 c16
                             c17 c18 c19 c20])
-          number-of-generations 25
+          number-of-generations 100
           population-size 50
           initial-distance (get-distance
                             (get-fittest

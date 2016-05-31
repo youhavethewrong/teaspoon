@@ -10,14 +10,14 @@
 (defn get-empty-population
   [n]
   (Population.
-   (vec (for [i (range n)]
-          nil))))
+   (vec
+    (java.util.ArrayList. n))))
 
 (defn get-empty-tour
   [n]
   (Tour.
-   (vec (for [i (range n)]
-          nil))))
+   (vec
+    (java.util.ArrayList. n))))
 
 (defn crossover
   [t1 t2]
@@ -64,8 +64,13 @@
 (defn mutate
   [t]
   (if (< (Math/random) mutation-rate)
-    (let [shv (shuffle (:l t))]
-      (Tour. shv))
+    (let [i (.intValue (* (Math/random) (get-tour-size t)))
+          j (.intValue (* (Math/random) (get-tour-size t)))
+          city0 (nth-city t i)
+          city1 (nth-city t j)
+          t' (set-city t i city1)
+          t' (set-city t' j city0)]
+      t')
     t))
 
 (defn mutate-population
