@@ -4,6 +4,9 @@ A library of solutions to the Travelling Salesman Problem (TSP).
 
 # References
 
+## The Travelling Salesman Problem
+<https://en.wikipedia.org/wiki/Travelling_salesman_problem>
+
 ## Genetic Algorithm
 <http://www.theprojectspot.com/tutorial-post/creating-a-genetic-algorithm-for-beginners/3>
 <http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5>
