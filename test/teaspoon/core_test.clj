@@ -1,6 +1,8 @@
 (ns teaspoon.core-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer [pprint]]
+            [clojure.spec :as s]
+            [clojure.spec.gen :as gen]
             [teaspoon.core :refer :all]
             [teaspoon.ga :as ga]
             [teaspoon.sa :as sa])
@@ -134,6 +136,18 @@
                             c17 c18 c19 c20])
           random-distance (get-distance (generate-individual (Tour. []) tm (number-of-cities tm)))
           t (sa/find-solution tm 10000)]
+      (is (> random-distance
+             (get-distance t)))
+      )))
+
+(deftest gen-test
+  (testing "Generate some cities and create a tour for them."
+    (let [tm (TourManager. (into [] (map #(second %) (s/exercise-fn `->City 20))))
+          random-distance (get-distance (generate-individual (Tour. []) tm (number-of-cities tm)))
+          t (sa/find-solution tm 10000)]
+      (println "Found a solution for tour of:")
+      (pprint tm)
+      (println "Final distance is" (get-distance t))
       (is (> random-distance
              (get-distance t)))
       )))

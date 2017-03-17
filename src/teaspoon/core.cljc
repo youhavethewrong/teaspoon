@@ -1,5 +1,6 @@
 (ns teaspoon.core
-  (:require [clojure.spec :as s]))
+  (:require [clojure.spec :as s]
+            [clojure.spec.test :as stest]))
 
 (defprotocol ICity
   (get-x [c])
@@ -21,7 +22,11 @@
 
 (s/def ::y-coord integer?)
 (s/def ::x-coord integer?)
-(s/def ::city (s/and (s/keys :req [::x-coord ::y-coord])))
+(s/def ::city (s/keys :req [::x-coord ::y-coord]))
+(s/fdef ->City
+        :args (s/cat :x ::x-coord :y ::y-coord)
+        :ret ::city)
+(stest/instrument `->City)
 
 (defprotocol ITourManager
   (add-city [t c])
@@ -34,7 +39,11 @@
   (get-city [t i] (nth l i))
   (number-of-cities [t] (count l)))
 
-(s/def ::tour-manager (s/coll-of ::city :distinct true))
+(s/def ::tour-manager (s/coll-of ::city :distinct true :min-count 2))
+(s/fdef ->TourManager
+        :args (s/cat :l ::tour-manager)
+        :ret ::tour-manager)
+(stest/instrument `->TourManager)
 
 (defprotocol ITour
   (generate-individual [t tm n])
@@ -62,7 +71,11 @@
   (get-tour-size [t] (count l))
   (contains-city [t c] (some #(= c %) l)))
 
-(s/def ::tour (s/coll-of ::city :kind vector? :distinct true))
+(s/def ::tour (s/coll-of ::city :kind vector? :distinct true :min-count 2))
+(s/fdef ->Tour
+        :args (s/cat :l ::tour)
+        :ret ::tour)
+(stest/instrument `->Tour)
 
 (defprotocol IPopulation
   (initialize [p tm n])
@@ -94,3 +107,7 @@
   (population-size [p] (count l)))
 
 (s/def ::population (s/coll-of ::tour))
+(s/fdef ->Population
+        :args (s/cat :l ::population)
+        :ret ::population)
+(stest/instrument `->Population)
