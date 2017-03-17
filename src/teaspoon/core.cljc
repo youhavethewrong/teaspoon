@@ -1,4 +1,5 @@
-(ns teaspoon.core)
+(ns teaspoon.core
+  (:require [clojure.spec :as s]))
 
 (defprotocol ICity
   (get-x [c])
@@ -10,9 +11,17 @@
   (get-x [c] x)
   (get-y [c] y)
   (distance-to [c c1]
-    (let [x-dist (Math/abs (- (get-x c) (get-x c1)))
-          y-dist (Math/abs (- (get-y c) (get-y c1)))]
-      (Math/sqrt (+ (* x-dist x-dist) (* y-dist y-dist))))))
+    (let [abs (fn [v] #?(:clj (Math/abs v)
+                         :cljs (.abs js/Math v)))
+          sqrt (fn [v] #?(:clj (Math/sqrt v)
+                          :cljs (.sqrt js/Math v)))
+          x-dist (abs (- (get-x c) (get-x c1)))
+          y-dist (abs (- (get-y c) (get-y c1)))]
+      (sqrt (+ (* x-dist x-dist) (* y-dist y-dist))))))
+
+(s/def ::y-coord integer?)
+(s/def ::x-coord integer?)
+(s/def ::city (s/and (s/keys :req [::x-coord ::y-coord])))
 
 (defprotocol ITourManager
   (add-city [t c])
@@ -24,6 +33,8 @@
   (add-city [t c] (TourManager. (conj l c)))
   (get-city [t i] (nth l i))
   (number-of-cities [t] (count l)))
+
+(s/def ::tour-manager (s/coll-of ::city :distinct true))
 
 (defprotocol ITour
   (generate-individual [t tm n])
@@ -50,6 +61,8 @@
                  (butlast l))))
   (get-tour-size [t] (count l))
   (contains-city [t c] (some #(= c %) l)))
+
+(s/def ::tour (s/coll-of ::city :kind vector? :distinct true))
 
 (defprotocol IPopulation
   (initialize [p tm n])
@@ -79,3 +92,5 @@
                       (:l (:tour (last b))))))
 
   (population-size [p] (count l)))
+
+(s/def ::population (s/coll-of ::tour))
