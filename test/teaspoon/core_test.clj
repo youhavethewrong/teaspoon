@@ -101,9 +101,10 @@
           initial-distance (get-distance
                             (get-fittest
                              (initialize (Population. []) tm population-size)))
-          p (ga/find-solution tm population-size number-of-generations)]
-      (is (> initial-distance
-             (get-distance (get-fittest p))))
+          p (ga/find-solution tm population-size number-of-generations)
+          best-distance (get-distance (get-fittest p))]
+      (println "GA found a solution with distance:" best-distance)
+      (is (> initial-distance best-distance))
       )))
 
 (deftest sa-test
@@ -136,6 +137,7 @@
                             c17 c18 c19 c20])
           random-distance (get-distance (generate-individual (Tour. []) tm (number-of-cities tm)))
           t (sa/find-solution tm 10000)]
+      (println "SA found a solution with distance:" (get-distance t))
       (is (> random-distance
              (get-distance t)))
       )))
@@ -145,7 +147,7 @@
     (let [tm (TourManager. (into [] (map #(second %) (s/exercise-fn `->City 20))))
           random-distance (get-distance (generate-individual (Tour. []) tm (number-of-cities tm)))
           t (sa/find-solution tm 10000)]
-      (println "Found a solution for tour of:")
+      (println "SA Found a tour for cities:")
       (pprint tm)
       (println "Final distance is" (get-distance t))
       (is (> random-distance

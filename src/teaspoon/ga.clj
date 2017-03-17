@@ -11,19 +11,13 @@
   [n]
   (Population.
    (vec
-    (java.util.ArrayList. n))))
-
-(defn get-empty-tour
-  [n]
-  (Tour.
-   (vec
-    (java.util.ArrayList. n))))
+    (repeat n nil))))
 
 (defn crossover
   [t1 t2]
   (let [t1-size (get-tour-size t1)
-        start (* (Math/random) t1-size)
-        end (* (Math/random) t1-size)
+        start (* (rand) t1-size)
+        end (* (rand) t1-size)
         ordered? (< start end)
         r (set
            (map #(.intValue %) (if ordered?
@@ -41,7 +35,7 @@
   (let [p1 (Population.
             (vec
              (for [i (range tournament-size)]
-               (get-tour p (* (Math/random) (population-size p))))))]
+               (get-tour p (* (rand) (population-size p))))))]
     (get-fittest p1)))
 
 (defn new-population
@@ -63,9 +57,9 @@
 
 (defn mutate
   [t]
-  (if (< (Math/random) mutation-rate)
-    (let [i (.intValue (* (Math/random) (get-tour-size t)))
-          j (.intValue (* (Math/random) (get-tour-size t)))
+  (if (< (rand) mutation-rate)
+    (let [i (.intValue (* (rand) (get-tour-size t)))
+          j (.intValue (* (rand) (get-tour-size t)))
           city0 (nth-city t i)
           city1 (nth-city t j)
           t' (set-city t i city1)
@@ -90,8 +84,6 @@
   (reset! elitism-offset 0)
   (loop [p (initialize (Population. []) tm s)
          c 0]
-    (println "Generation" c)
-    (println "Distance" (get-distance (get-fittest p)))
     (if (>= c n)
       p
       (recur (evolve-population p) (inc c)))))
