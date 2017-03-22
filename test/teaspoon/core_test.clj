@@ -98,11 +98,11 @@
                             c17 c18 c19 c20])
           number-of-generations 25
           population-size 50
-          initial-distance (get-distance
-                            (get-fittest
-                             (initialize (Population. []) tm population-size)))
+          initial-distance (.get-distance
+                            (.get-fittest
+                             (.initialize (Population. []) tm population-size)))
           p (ga/find-solution tm population-size number-of-generations)
-          best-distance (get-distance (get-fittest p))]
+          best-distance (.get-distance (.get-fittest p))]
       (println "GA found a solution with distance:" best-distance)
       (is (> initial-distance best-distance))
       )))
@@ -135,21 +135,25 @@
                             c9  c10 c11 c12
                             c13 c14 c15 c16
                             c17 c18 c19 c20])
-          random-distance (get-distance (generate-individual (Tour. []) tm (number-of-cities tm)))
+          random-distance (.get-distance
+                           (.generate-individual
+                            (Tour. []) tm (.number-of-cities tm)))
           t (sa/find-solution tm 10000)]
-      (println "SA found a solution with distance:" (get-distance t))
+      (println "SA found a solution with distance:" (.get-distance t))
       (is (> random-distance
-             (get-distance t)))
+             (.get-distance t)))
       )))
 
 (deftest gen-test
   (testing "Generate some cities and create a tour for them."
-    (let [tm (TourManager. (into [] (map #(second %) (s/exercise-fn `->City 20))))
-          random-distance (get-distance (generate-individual (Tour. []) tm (number-of-cities tm)))
+    (let [tm (gen/generate (s/gen :teaspoon.core/tour-manager))
+          random-distance (.get-distance
+                           (.generate-individual
+                            (Tour. []) tm (.number-of-cities tm)))
           t (sa/find-solution tm 10000)]
       (println "SA Found a tour for cities:")
       (pprint tm)
-      (println "Final distance is" (get-distance t))
+      (println "Final distance is" (.get-distance t))
       (is (> random-distance
-             (get-distance t)))
+             (.get-distance t)))
       )))

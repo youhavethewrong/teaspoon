@@ -1,5 +1,6 @@
 (ns teaspoon.core
   (:require [clojure.spec :as s]
+            [clojure.spec.gen :as gen]
             [clojure.spec.test :as stest]))
 
 (defprotocol ICity
@@ -22,11 +23,11 @@
 
 (s/def ::y-coord integer?)
 (s/def ::x-coord integer?)
-(s/def ::city (s/keys :req [::x-coord ::y-coord]))
-(s/fdef ->City
-        :args (s/cat :x ::x-coord :y ::y-coord)
-        :ret ::city)
-(stest/instrument `->City)
+(s/def ::city
+  (s/with-gen #(instance? City %)
+    (fn [] (gen/fmap
+            (fn [[x y n]] (->City x y))
+            (s/gen (s/tuple ::x-coord ::y-coord))))))
 
 (defprotocol ITourManager
   (add-city [t c])
@@ -39,11 +40,11 @@
   (get-city [t i] (nth l i))
   (number-of-cities [t] (count l)))
 
-(s/def ::tour-manager (s/coll-of ::city :distinct true :min-count 2))
-(s/fdef ->TourManager
-        :args (s/cat :l ::tour-manager)
-        :ret ::tour-manager)
-(stest/instrument `->TourManager)
+(s/def ::tour-manager
+  (s/with-gen #(instance? TourManager %)
+    (fn [] (gen/fmap
+            #(TourManager. %)
+            (s/gen (s/coll-of ::city :distinct true :min-count 3))))))
 
 (defprotocol ITour
   (generate-individual [t tm n])
@@ -59,23 +60,19 @@
   (generate-individual [t tm n]
     (Tour. (shuffle
             (for [i (range n)]
-                (get-city tm i)))))
+                (.get-city tm i)))))
   (nth-city [t i] (nth l i))
   (set-city [t i c] (Tour. (assoc l i c)))
-  (get-fitness [t] (/ 1 (get-distance t)))
+  (get-fitness [t] (/ 1 (.get-distance t)))
   (get-distance [t]
     (reduce + 0 (map-indexed
                  (fn [i v]
-                   (distance-to v (get l (inc i))))
+                   (.distance-to v (nth-city t (inc i))))
                  (butlast l))))
   (get-tour-size [t] (count l))
   (contains-city [t c] (some #(= c %) l)))
 
-(s/def ::tour (s/coll-of ::city :kind vector? :distinct true :min-count 2))
-(s/fdef ->Tour
-        :args (s/cat :l ::tour)
-        :ret ::tour)
-(stest/instrument `->Tour)
+(s/def ::tour (s/coll-of ::city :kind vector? :distinct true :min-count 3))
 
 (defprotocol IPopulation
   (initialize [p tm n])
@@ -107,7 +104,3 @@
   (population-size [p] (count l)))
 
 (s/def ::population (s/coll-of ::tour))
-(s/fdef ->Population
-        :args (s/cat :l ::population)
-        :ret ::population)
-(stest/instrument `->Population)
