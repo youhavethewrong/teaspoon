@@ -26,7 +26,7 @@
 (s/def ::city
   (s/with-gen #(instance? City %)
     (fn [] (gen/fmap
-            (fn [[x y n]] (->City x y))
+            (fn [[x y]] (->City x y))
             (s/gen (s/tuple ::x-coord ::y-coord))))))
 
 (defprotocol ITourManager

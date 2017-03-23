@@ -3,5 +3,5 @@
   :url "https://github.com/youhavethewrong/teaspoon"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
                  [org.clojure/test.check "0.9.0"]])
