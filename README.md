@@ -1,5 +1,5 @@
 # Teaspoon
-
+[![Clojars Project](https://img.shields.io/clojars/v/teaspoon.svg)](https://clojars.org/teaspoon)
 A library of solutions to the Travelling Salesman Problem (TSP).
 
 # References
